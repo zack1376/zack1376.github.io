@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>先更新还是先计数</title>
+    <link href="/2024/08/15/%E5%85%88%E6%9B%B4%E6%96%B0%E8%BF%98%E6%98%AF%E5%85%88%E8%AE%A1%E6%95%B0/"/>
+    <url>/2024/08/15/%E5%85%88%E6%9B%B4%E6%96%B0%E8%BF%98%E6%98%AF%E5%85%88%E8%AE%A1%E6%95%B0/</url>
+    
+    <content type="html"><![CDATA[<h1 id="力扣560：应该先计算前缀和还是先count"><a href="#力扣560：应该先计算前缀和还是先count" class="headerlink" title="力扣560：应该先计算前缀和还是先count"></a>力扣560：应该先计算前缀和还是先count</h1><p><a href="https://leetcode.cn/problems/subarray-sum-equals-k/">560. 和为 K 的子数组</a>的标准做法是使用前缀和并通过哈希表优化，但是在主循环中，count和计算前缀和的顺序大部分解答都完全没有提及，看起来好像是不重要的，但是我在写这道题的时候却觉得没有那么“显然”。</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">subarraySum</span><span class="hljs-params">(<span class="hljs-type">int</span>[] nums, <span class="hljs-type">int</span> k)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">pre</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        Map&lt;Integer, Integer&gt; preMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;();<br>        preMap.put(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>);<br>        <span class="hljs-type">int</span> <span class="hljs-variable">len</span> <span class="hljs-operator">=</span> nums.length;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; len; i++) &#123;<br>            pre = pre + nums[i];<br>            <span class="hljs-comment">// put or count first?</span><br>            <span class="hljs-keyword">if</span> (preMap.containsKey(pre - k)) &#123;<br>                count += preMap.get(pre - k);<br>            &#125;<br><br>            preMap(pre, preMap.getOrDefault(pre, <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>);<br>        &#125;<br>        <span class="hljs-keyword">return</span> count;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure><p>先说结论，必须是<strong>先put后count</strong>，不然在k&#x3D;0，且nums数组包含0的时候会出错。</p><h3 id="前缀和的思路"><a href="#前缀和的思路" class="headerlink" title="前缀和的思路"></a>前缀和的思路</h3><p>可以考虑$[i…j]$这个区间的和为k，</p><p>使用前缀和思想：$pre[j] - pre[i-1] &#x3D; k$</p><p>即$pre[j] &#x3D; k + pre[i-1]$</p><p>当我们遍历到$j$的时候，需要统计前面所有的$0,…,j-1$到$j$的和。</p><p>可以使用哈希表辅助查询，我们已经有了$pre[j]$</p><p>直接用该值去查询$key$对应的$value$即可。</p><h3 id="为什么要先put后count"><a href="#为什么要先put后count" class="headerlink" title="为什么要先put后count"></a>为什么要先put后count</h3><p>还是回到$pre[j] &#x3D; k+pre[i-1]$</p><p>其实我们就是需要找到$i-1$和$j$夹缝之间的一段序列，然后这段序列刚好为$k$，</p><p>那么如果先put，就意味着$i-1$可以等于$j$，继而夹缝为空，所以一段空数组等于$k$，显然不行。</p><p>所以就需要先put后count</p><h3 id="具体证明"><a href="#具体证明" class="headerlink" title="具体证明"></a>具体证明</h3><p>上面的说法看起来还不够有力，我们来具体证明一下吧。</p><p>只有当$k&#x3D;0$的时候有影响，因为只有当k&#x3D;0的时候，本次循环中put的pre[j]值才会立即被count表达式中的pre[j]-k用到，</p><p>所以只考虑$k&#x3D;0$的情况：</p><p>Map中存储的是各种前缀和的记录，如果是先put，我们考虑数组$[0,…,j-1]$都不为$0$，且$nums[j] &#x3D; 0$。</p><p>显然这时候从$pre[0]$到$pre[i]$都不为$0$，且$pre[i] &#x3D; pre[j]$。</p><p>那么在put的时候，因为$pre[i] &#x3D; pre[j]$，所以这一项的$value&#x3D;2$。</p><p>之后count的时候，显然count也为$2$，即和为$k$的子数组为$2$，显然错误，证明完毕。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Leetcode</tag>
+      
+      <tag>前缀和</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>

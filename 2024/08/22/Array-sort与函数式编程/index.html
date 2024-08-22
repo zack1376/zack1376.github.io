@@ -1,0 +1,683 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Zack">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Array.sort()与函数式编程在做力扣56. 合并区间时，遇到了一个问题：在解题过程中需要对区间进行排序，排序的依据是区间的左区间值。但是Array.sort()的无参数使用却并不是按照这个依据进行排序的，现在应该怎么办？ Array.sort()方法的原理 原始类型数组：使用了一种改进的双轴快速排序算法 对象数组：使用的是一种基于归并排序和插入排序的混合排序算法  当然这不是问题的关键，关">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Array.sort与函数式编程">
+<meta property="og:url" content="https://zack1376.github.io/2024/08/22/Array-sort%E4%B8%8E%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="zack">
+<meta property="og:description" content="Array.sort()与函数式编程在做力扣56. 合并区间时，遇到了一个问题：在解题过程中需要对区间进行排序，排序的依据是区间的左区间值。但是Array.sort()的无参数使用却并不是按照这个依据进行排序的，现在应该怎么办？ Array.sort()方法的原理 原始类型数组：使用了一种改进的双轴快速排序算法 对象数组：使用的是一种基于归并排序和插入排序的混合排序算法  当然这不是问题的关键，关">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-08-22T08:54:26.000Z">
+<meta property="article:modified_time" content="2024-08-22T08:54:26.528Z">
+<meta property="article:author" content="Zack">
+<meta property="article:tag" content="函数式编程">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Array.sort与函数式编程 - zack</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zack1376.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>zack</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Array.sort与函数式编程"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-08-22 16:54" pubdate>
+          2024年8月22日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          11 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Array.sort与函数式编程</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Array-sort-与函数式编程"><a href="#Array-sort-与函数式编程" class="headerlink" title="Array.sort()与函数式编程"></a><code>Array.sort()</code>与函数式编程</h1><p>在做力扣<a target="_blank" rel="noopener" href="https://leetcode.cn/problems/merge-intervals/">56. 合并区间</a>时，遇到了一个问题：在解题过程中需要对区间进行排序，排序的依据是区间的左区间值。但是<code>Array.sort()</code>的无参数使用却并不是按照这个依据进行排序的，现在应该怎么办？</p>
+<h2 id="Array-sort-方法的原理"><a href="#Array-sort-方法的原理" class="headerlink" title="Array.sort()方法的原理"></a><code>Array.sort()</code>方法的原理</h2><ul>
+<li>原始类型数组：使用了一种改进的双轴快速排序算法</li>
+<li>对象数组：使用的是一种基于归并排序和插入排序的混合排序算法</li>
+</ul>
+<p>当然这不是问题的关键，关键是在排序的过程中如何实现比较？</p>
+<ul>
+<li>如果对象实现了<code>Comparable</code>接口，并重载了<code>compareTo</code>方法，那么sort可以根据该方法返回的<code>int</code>类型数字进行排序</li>
+<li>如果不想修改类来实现<code>Comparable</code>接口，那么可以使用<code>Comparator</code>接口。同样的，<code>Comparator</code>接口有一个<code>compare</code>方法，可以根据输入的两个对象的大小来返回<code>int</code>类型数字。</li>
+<li>如果这两个接口都没有实现，<code>Arrays.sort()</code> 方法时会抛出 <code>java.lang.ClassCastException</code> 异常。</li>
+</ul>
+<p>显然在排序区间的时候，我们定义了一个二维数组<code>int[][]</code>，本身就实现了<code>Comparable</code>接口，但排序逻辑和我们需要的并不一样，所以我们应该通过<code>Comparator</code>接口来自定义比较方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T&gt; <span class="hljs-keyword">void</span> <span class="hljs-title function_">sort</span><span class="hljs-params">(T[] a, Comparator&lt;? <span class="hljs-built_in">super</span> T&gt; c)</span>;<br></code></pre></td></tr></table></figure>
+
+<p><code>Array.sort()</code>有这样一个原型方法，要求我们传入一个<code>Comparator</code>接口来指定排序规则，就是来做这件事的。</p>
+<p>那我们该如何传入这个<code>Comparator</code>呢？</p>
+<h2 id="函数式编程"><a href="#函数式编程" class="headerlink" title="函数式编程"></a>函数式编程</h2><p>函数式编程是一种编程范式，它强调使用函数的方式来处理数据，通常具有以下特征：</p>
+<ol>
+<li><strong>不可变性</strong>：数据一旦创建就不可更改，而是返回新数据。</li>
+<li><strong>纯函数</strong>：相同输入总是返回相同输出，没有副作用（不依赖或修改全局状态）。</li>
+<li><strong>高阶函数</strong>：可以接收函数作为参数或返回函数。</li>
+</ol>
+<p>Java 从 <code>Java 8</code> 开始引入了函数式编程的支持，主要通过 <code>Lambda</code> 表达式和 <code>Stream API</code> 来实现。</p>
+<h3 id="Lambda-表达式"><a href="#Lambda-表达式" class="headerlink" title="Lambda 表达式"></a>Lambda 表达式</h3><p>Lambda 表达式是一种简洁的函数定义方式，通常用于实现函数接口的单个方法。它的语法如下：</p>
+<figure class="highlight livescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs livescript"><span class="hljs-function"><span class="hljs-params">(parameters)</span> -&gt;</span> expression<br></code></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">Comparator&lt;String&gt; byLength = (s1, s2) -&gt; s1.length() - s2.length();<br></code></pre></td></tr></table></figure>
+
+<h2 id="结合-Arrays-sort-与函数式编程"><a href="#结合-Arrays-sort-与函数式编程" class="headerlink" title="结合 Arrays.sort() 与函数式编程"></a>结合 <code>Arrays.sort()</code> 与函数式编程</h2><p><code>Arrays.sort()</code> 和函数式编程可以结合使用。可以使用 Lambda 表达式来定义排序规则，从而让代码更加简洁：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">Arrays.sort(people, (p1, p2) -&gt; p1.age - p2.age);<br></code></pre></td></tr></table></figure>
+
+<p>同理，我们对于我们的需求也可以如此定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">Arrays.sort(intervals, (a, b)-&gt;a[<span class="hljs-number">0</span>] - b[<span class="hljs-number">0</span>]);<br></code></pre></td></tr></table></figure>
+
+<p>不过最好还是这么来写：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">Arrays.sort(intervals, (a, b) -&gt; Integer.compare(a[<span class="hljs-number">0</span>], b[<span class="hljs-number">0</span>]));<br></code></pre></td></tr></table></figure>
+
+<p>以为上面的代码可能会造成整数溢出。一个不太恰当的例子如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> java.util.Arrays;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Main</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">int</span>[][] intervals = &#123;<br>            &#123;Integer.MAX_VALUE, <span class="hljs-number">10</span>&#125;, <span class="hljs-comment">//区间左边值大不太合理</span><br>            &#123;Integer.MIN_VALUE, <span class="hljs-number">20</span>&#125;<br>        &#125;;<br><br>        <span class="hljs-comment">// 使用简单的 a[0] - b[0] 进行排序</span><br>        Arrays.sort(intervals, (a, b) -&gt; a[<span class="hljs-number">0</span>] - b[<span class="hljs-number">0</span>]);<br><br>        <span class="hljs-comment">// 输出排序后的结果</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span>[] interval : intervals) &#123;<br>            System.out.println(Arrays.toString(interval));<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="为什么可以这样写？"><a href="#为什么可以这样写？" class="headerlink" title="为什么可以这样写？"></a>为什么可以这样写？</h2><p>第一次看这个代码的时候，我还是不太明白，不是函数原型要求传入一个<code>Comparator</code>类型的函数吗？上面的写法好像并没有显示的声明类型啊</p>
+<p>首先，最最传统的写法应该是匿名内部类，关于匿名内部类可以看这篇博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/yang_guang3/article/details/133298411">Java中的匿名内部类(看这篇就够了)_java获取匿名内部类-CSDN博客</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//匿名内部类实现</span><br>Comparator&lt;<span class="hljs-type">int</span>[]&gt; myComparator = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Comparator</span>&lt;&gt;() &#123;<br>	<span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">compare</span><span class="hljs-params">(<span class="hljs-type">int</span>[] a, <span class="hljs-type">int</span>[] b)</span> &#123;<br>		<span class="hljs-keyword">return</span> Integer.compare(a[<span class="hljs-number">0</span>], b[<span class="hljs-number">0</span>]);<br>	&#125;<br>&#125;;<br>Arrays.sort(intervals, myComparator);<br></code></pre></td></tr></table></figure>
+
+<p>使用lambda表达式可以简化这一写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//使用lambda表达式实现</span><br>Comparator&lt;<span class="hljs-type">int</span>[]&gt; myComparator = (a, b) -&gt; Integer.compare(a[<span class="hljs-number">0</span>], b[<span class="hljs-number">0</span>]);<br>Arrays.sort(intervals, myComparator);<br></code></pre></td></tr></table></figure>
+
+<p>当然我们也没必要显式的声明<code>Comparator&lt;int[]&gt;</code>，在 Java 中，当你使用 lambda 表达式 <code>(a, b) -&gt; Integer.compare(a[0], b[0])</code> 时，编译器会自动将其转换成一个实现了 <code>Comparator&lt;int[]&gt;</code> 接口的对象。这个过程不需要显式地声明 <code>Comparator&lt;int[]&gt;</code>，因为 lambda 表达式的目标类型由上下文决定。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//不用显式的声明`Comparator&lt;int[]&gt;`</span><br>Arrays.sort(intervals, (a, b) -&gt; Integer.compare(a[<span class="hljs-number">0</span>], b[<span class="hljs-number">0</span>]));<br></code></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>Array.sort()</code>依据两个接口实现比较，若需要自定义比较方式，可以通过传入一个<code>compare</code>函数，使用lambda表达式可以很方便完成这一步。</p>
+<ul>
+<li><strong>推荐使用</strong>：<code>Arrays.sort(intervals, (a, b) -&gt; Integer.compare(a[0], b[0]));</code><ul>
+<li>这种写法更安全，避免了整数溢出问题。</li>
+<li>可读性更高，让人一眼就能看出这段代码是在比较两个整数。</li>
+</ul>
+</li>
+<li><strong>不推荐使用</strong>：<code>Arrays.sort(intervals, (a, b) -&gt; a[0] - b[0]);</code><ul>
+<li>虽然简洁，但在处理极端情况下可能会导致错误的比较结果。</li>
+</ul>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B/" class="print-no-link">#函数式编程</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Array.sort与函数式编程</div>
+      <div>https://zack1376.github.io/2024/08/22/Array-sort与函数式编程/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Zack</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年8月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/08/19/%E6%89%93%E5%AE%B6%E5%8A%AB%E8%88%8D%E4%B8%8E%E5%8D%87%E7%BA%A7%E7%89%88/" title="打家劫舍与升级版">
+                        <span class="hidden-mobile">打家劫舍与升级版</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
